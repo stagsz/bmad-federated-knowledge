@@ -1,0 +1,61 @@
+bmad_config:
+  version: "2.0"
+  local_knowledge:
+    core_data: ./bmad-core/core-data
+    templates: ./bmad-core/templates
+    workflows: ./bmad-core/workflows
+  federated_knowledge:
+    org_standards:
+      repo: git@github.com:company/bmad-org-standards.git
+      branch: main
+      local_cache: ./bmad-cache/org-standards
+      sync_policy: daily
+      priority: 1
+      metadata:
+        description: Organization-wide shared knowledge and standards
+        maintainer: platform-team@company.com
+        tags:
+          - standards
+          - organization
+    industry_templates:
+      repo: git@github.com:bmad-community/software-templates.git
+      branch: stable
+      local_cache: ./bmad-cache/industry
+      sync_policy: weekly
+      priority: 0
+      filters:
+        include:
+          - templates/**
+          - workflows/**
+        exclude:
+          - "*.tmp"
+          - "*.log"
+      metadata:
+        description: Industry best practices and templates
+        maintainer: bmad-community
+        tags:
+          - templates
+          - best-practices
+    team_workflows:
+      repo: git@gitlab.company.com:teams/backend/bmad-workflows.git
+      branch: production
+      local_cache: ./bmad-cache/team-backend
+      sync_policy: on_demand
+      priority: 2
+      auth:
+        type: token
+        token: ${GITLAB_TOKEN}
+      metadata:
+        description: Team-specific workflows and configurations
+        maintainer: backend-team@company.com
+        tags:
+          - workflows
+          - backend
+          - team
+  federated_settings:
+    cache_root: ./bmad-cache
+    max_cache_size: 1GB
+    sync_timeout: 300
+    retry_attempts: 3
+    parallel_sync: true
+    conflict_resolution: priority

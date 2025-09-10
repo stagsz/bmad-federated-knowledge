@@ -1,0 +1,103 @@
+{
+  "name": "bmad-federated-knowledge",
+  "version": "1.0.0",
+  "description": "Git-Based Federated Knowledge System extension for BMAD-METHOD",
+  "main": "src/index.js",
+  "bin": {
+    "bmad-fed": "src/cli/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix",
+    "build": "npm run lint && npm run test",
+    "dev": "nodemon src/index.js",
+    "docs:generate": "jsdoc -c jsdoc.conf.json",
+    "prepare": "husky install"
+  },
+  "keywords": [
+    "bmad-method",
+    "federated-knowledge",
+    "git",
+    "knowledge-management",
+    "ai-development",
+    "agile",
+    "distributed-systems"
+  ],
+  "author": "BMAD Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bmad-community/bmad-federated-knowledge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bmad-community/bmad-federated-knowledge/issues"
+  },
+  "homepage": "https://github.com/bmad-community/bmad-federated-knowledge#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "bmad-method": ">=4.0.0",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "fs-extra": "^11.1.1",
+    "inquirer": "^8.2.6",
+    "joi": "^17.11.0",
+    "lodash": "^4.17.21",
+    "node-cron": "^3.0.3",
+    "ora": "^5.4.1",
+    "semver": "^7.5.4",
+    "simple-git": "^3.20.0",
+    "winston": "^3.11.0",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "eslint": "^8.54.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "husky": "^8.0.3",
+    "jest": "^29.7.0",
+    "jsdoc": "^4.0.2",
+    "lint-staged": "^15.1.0",
+    "nodemon": "^3.0.1"
+  },
+  "peerDependencies": {
+    "bmad-method": ">=4.0.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/cli/index.js"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
+  },
+  "bmad": {
+    "extension": true,
+    "type": "knowledge-system",
+    "compatibility": ">=4.0.0",
+    "hooks": {
+      "pre-resolve": "src/hooks/pre-resolve.js",
+      "post-sync": "src/hooks/post-sync.js"
+    }
+  }
+}

@@ -1,0 +1,129 @@
+# Enhanced BMAD Core Configuration with Federated Knowledge Support
+# This is an example configuration showing how to set up federated knowledge repositories
+
+bmad_config:
+  version: "2.0"
+  
+  # Local knowledge (existing BMAD structure)
+  local_knowledge:
+    core_data: "./bmad-core/core-data"
+    templates: "./bmad-core/templates"
+    workflows: "./bmad-core/workflows"
+  
+  # Federated knowledge repositories
+  federated_knowledge:
+    # Organization-wide shared knowledge
+    org_standards:
+      repo: "git@github.com:company/bmad-org-standards.git"
+      branch: "main"
+      local_cache: "./bmad-cache/org-standards"
+      sync_policy: "daily"
+      priority: 10  # High priority for org standards
+      
+      auth:
+        type: "ssh"  # Use SSH key authentication
+      
+      filters:
+        include: ["templates/**", "workflows/**", "core-data/**"]
+        exclude: ["*.tmp", "*.log", ".git/**", "node_modules/**"]
+      
+      metadata:
+        description: "Organization-wide development standards and templates"
+        maintainer: "platform-team@company.com"
+        tags: ["standards", "organization", "templates"]
+    
+    # Industry best practices from community
+    industry_templates:
+      repo: "https://github.com/bmad-community/software-templates.git"
+      branch: "stable"
+      local_cache: "./bmad-cache/industry"
+      sync_policy: "weekly"
+      priority: 5  # Medium priority
+      
+      auth:
+        type: "token"
+        token: "${GITHUB_TOKEN}"  # Environment variable
+      
+      filters:
+        include: ["templates/**", "workflows/**"]
+        exclude: ["*.tmp", "*.log", "experimental/**"]
+      
+      metadata:
+        description: "Industry best practices and community templates"
+        maintainer: "bmad-community"
+        tags: ["templates", "best-practices", "community"]
+    
+    # Team-specific shared knowledge
+    team_backend:
+      repo: "git@gitlab.company.com:teams/backend/bmad-workflows.git"
+      branch: "production"
+      local_cache: "./bmad-cache/team-backend"
+      sync_policy: "on_demand"
+      priority: 8  # High priority for team-specific
+      
+      auth:
+        type: "token"
+        token: "${GITLAB_TOKEN}"
+      
+      filters:
+        include: ["workflows/**", "templates/backend/**", "core-data/backend/**"]
+        exclude: ["*.tmp", "*.log", "draft/**"]
+      
+      metadata:
+        description: "Backend team-specific workflows and configurations"
+        maintainer: "backend-team@company.com"
+        tags: ["workflows", "backend", "team"]
+    
+    # External vendor templates (example with basic auth)
+    vendor_templates:
+      repo: "https://vendor.example.com/git/bmad-templates.git"
+      branch: "main"
+      local_cache: "./bmad-cache/vendor"
+      sync_policy: "manual"  # Only sync when explicitly requested
+      priority: 3  # Lower priority
+      
+      auth:
+        type: "basic"
+        username: "${VENDOR_USERNAME}"
+        password: "${VENDOR_PASSWORD}"
+      
+      filters:
+        include: ["templates/**"]
+        exclude: ["internal/**", "*.tmp"]
+      
+      metadata:
+        description: "Vendor-provided templates and workflows"
+        maintainer: "vendor-support@example.com"
+        tags: ["vendor", "templates", "external"]
+  
+  # Global federated settings
+  federated_settings:
+    cache_root: "./bmad-cache"
+    max_cache_size: "2GB"
+    sync_timeout: 300  # 5 minutes
+    retry_attempts: 3
+    parallel_sync: true
+    conflict_resolution: "priority"  # priority|manual|local_wins
+  
+  # Existing BMAD configuration (preserved)
+  agents:
+    analyst:
+      role: "Business Analyst"
+      capabilities: ["requirements", "analysis", "documentation"]
+    
+    architect:
+      role: "Solution Architect"
+      capabilities: ["design", "architecture", "patterns"]
+    
+    developer:
+      role: "Senior Developer"
+      capabilities: ["implementation", "testing", "optimization"]
+  
+  dependencies:
+    - "templates"
+    - "workflows"
+    - "core-data"
+  
+  devLoadAlwaysFiles:
+    - "bmad-core/core-config.yaml"
+    - "bmad-core/agent-configs/*.yaml"
