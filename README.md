@@ -13,6 +13,18 @@ You can read the associated article for this code [here](https://medium.com/@vis
 - **CLI Management**: Comprehensive command-line interface for repository management
 - **Seamless Integration**: Extends existing BMAD-METHOD functionality
 
+## 🗺️ Future Roadmap
+
+- [ ] Web UI for repository management
+- [ ] Advanced conflict resolution strategies
+- [ ] Repository templates and scaffolding
+- [ ] Integration with popular Git hosting services
+- [ ] Performance optimizations for large repositories
+- [ ] Backup and restore functionality
+- [ ] Support for adding webpages, or other knowledge sources beyond git repos
+- [ ] Enhanced filtering and selection of knowledge subsets
+- [ ] Improved offline support and caching strategies
+
 ## 📦 Installation
 
 ```bash
@@ -329,9 +341,7 @@ Enable intelligent code generation spanning multiple repos
 5. Run the test suite
 6. Submit a pull request
 
-## 📄 License
 
-MIT License - see LICENSE file for details.
 
 ## 🆘 Support
 
@@ -339,11 +349,3 @@ MIT License - see LICENSE file for details.
 - Documentation: [Full documentation](https://github.com/bmad-community/bmad-federated-knowledge/wiki)
 - Community: [Join the discussion](https://github.com/bmad-community/bmad-federated-knowledge/discussions)
 
-## 🗺️ Roadmap
-
-- [ ] Web UI for repository management
-- [ ] Advanced conflict resolution strategies
-- [ ] Repository templates and scaffolding
-- [ ] Integration with popular Git hosting services
-- [ ] Performance optimizations for large repositories
-- [ ] Backup and restore functionality
