@@ -1,6 +1,6 @@
 {
   "name": "bmad-federated-knowledge",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Git-Based Federated Knowledge System extension for BMAD-METHOD",
   "main": "src/index.js",
   "bin": {
@@ -27,16 +27,16 @@
     "agile",
     "distributed-systems"
   ],
-  "author": "BMAD Community",
+  "author": "Vishal Mysore",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bmad-community/bmad-federated-knowledge.git"
+    "url": "https://github.com/vishalmysore/bmad-federated-knowledge"
   },
   "bugs": {
-    "url": "https://github.com/bmad-community/bmad-federated-knowledge/issues"
+    "url": "https://github.com/vishalmysore/bmad-federated-knowledge/issues"
   },
-  "homepage": "https://github.com/bmad-community/bmad-federated-knowledge#readme",
+  "homepage": "https://github.com/vishalmysore/bmad-federated-knowledge",
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"

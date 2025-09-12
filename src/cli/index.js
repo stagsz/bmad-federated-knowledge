@@ -117,7 +117,7 @@ program
             type: 'input',
             name: 'local_cache',
             message: 'Local cache path:',
-            default: options.cache || `./bmad-cache/${name}`
+            default: options.cache || `./.bmad-fks-cache/${name}`
           },
           {
             type: 'list',
