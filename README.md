@@ -34,23 +34,23 @@ bmad_config:
   
   # Local knowledge (existing)
   local_knowledge:
-    core_data: "./bmad-core/core-data"
-    templates: "./bmad-core/templates"
-    workflows: "./bmad-core/workflows"
+    core_data: "./.bmad-fks-core/core-data"
+    templates: "./.bmad-fks-core/templates"
+    workflows: "./.bmad-fks-core/workflows"
   
   # Federated knowledge repositories
   federated_knowledge:
     org_standards:
       repo: "git@github.com:company/bmad-org-standards.git"
       branch: "main"
-      local_cache: "./bmad-cache/org-standards"
+      local_cache: "./.bmad-fks-cache/org-standards"
       sync_policy: "daily"
       priority: 1
     
     industry_templates:
       repo: "git@github.com:bmad-community/software-templates.git"
       branch: "stable"
-      local_cache: "./bmad-cache/industry"
+      local_cache: "./.bmad-fks-cache/industry"
       sync_policy: "weekly"
       priority: 0
 ```
@@ -112,8 +112,8 @@ bmad-fed status --verbose
 const { BmadFederatedKnowledge } = require('bmad-federated-knowledge');
 
 const bmadFed = new BmadFederatedKnowledge({
-  configPath: './bmad-core/core-config.yaml',
-  cacheDir: './bmad-cache',
+  configPath: './.bmad-fks-core/core-config.yaml',
+  cacheDir: './.bmad-fks-cache',
   logLevel: 'info'
 });
 
@@ -169,7 +169,7 @@ Each federated repository can be configured with the following options:
 repo_name:
   repo: "git@github.com:user/repo.git"     # Repository URL (required)
   branch: "main"                           # Branch to sync (default: main)
-  local_cache: "./bmad-cache/repo_name"    # Local cache path (required)
+  local_cache: "./.bmad-fks-cache/repo_name"    # Local cache path (required)
   sync_policy: "weekly"                    # Sync policy (daily|weekly|on_demand|manual)
   priority: 1                              # Priority for conflict resolution (0-999)
   
@@ -196,7 +196,7 @@ repo_name:
 
 ```yaml
 federated_settings:
-  cache_root: "./bmad-cache"               # Root cache directory
+  cache_root: "./.bmad-fks-cache"               # Root cache directory
   max_cache_size: "1GB"                   # Maximum cache size
   sync_timeout: 300                       # Sync timeout in seconds
   retry_attempts: 3                       # Number of retry attempts

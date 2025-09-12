@@ -24,7 +24,7 @@ program
 program
   .command('init')
   .description('Initialize federated knowledge system')
-  .option('-c, --config <path>', 'Configuration file path', './bmad-core/core-config.yaml')
+  .option('-c, --config <path>', 'Configuration file path', './.bmad-fks-core/fks-core-config.yaml')
   .option('-f, --force', 'Force initialization even if already exists')
   .action(async (options) => {
     const spinner = ora('Initializing BMAD Federated Knowledge System...').start();
@@ -72,7 +72,7 @@ program
       await bmadFed.initialize();
       
       spinner.succeed(chalk.green('BMAD Federated Knowledge System initialized successfully!'));
-      console.log(chalk.blue(`Configuration saved to: ${options.config}`));
+      console.log(chalk.blue(`FKS Configuration saved to: ${options.config}`));
       console.log(chalk.blue('Run "bmad-fed status" to check system status.'));
     } catch (error) {
       spinner.fail(chalk.red('Initialization failed'));
@@ -405,7 +405,7 @@ program
   .description('Validate configuration file')
   .action(async (configPath) => {
     try {
-      const path = configPath || './bmad-core/core-config.yaml';
+      const path = configPath || './bmad-fks-core/fks-core-config.yaml';
       const spinner = ora(`Validating configuration: ${path}`).start();
       
       const config = await configValidator.validate(path);

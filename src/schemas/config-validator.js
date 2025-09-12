@@ -43,9 +43,9 @@ class ConfigValidator {
         
         // Existing local knowledge structure
         local_knowledge: Joi.object({
-          core_data: Joi.string().default('./bmad-core/core-data'),
-          templates: Joi.string().default('./bmad-core/templates'),
-          workflows: Joi.string().default('./bmad-core/workflows')
+          core_data: Joi.string().default('./.bmad-fks-core/core-data'),
+          templates: Joi.string().default('./.bmad-fks-core/templates'),
+          workflows: Joi.string().default('./.bmad-fks-core/workflows')
         }).optional(),
 
         // New federated knowledge structure
@@ -56,7 +56,7 @@ class ConfigValidator {
 
         // Global federated settings
         federated_settings: Joi.object({
-          cache_root: Joi.string().default('./bmad-cache'),
+          cache_root: Joi.string().default('./.bmad-cache'),
           max_cache_size: Joi.string().default('1GB'),
           sync_timeout: Joi.number().default(300),
           retry_attempts: Joi.number().default(3),
@@ -161,35 +161,35 @@ class ConfigValidator {
         version: "2.0",
         
         local_knowledge: {
-          core_data: "./bmad-core/core-data",
-          templates: "./bmad-core/templates",
-          workflows: "./bmad-core/workflows"
+          core_data: "./.bmad-fks-core/core-data",
+          templates: "./.bmad-fks-core/templates",
+          workflows: "./.bmad-fks-core/workflows"
         },
         
         federated_knowledge: {
-          org_standards: {
-            repo: "git@github.com:company/bmad-org-standards.git",
-            branch: "main",
-            local_cache: "./bmad-cache/org-standards",
-            sync_policy: "daily",
-            priority: 1,
-            metadata: {
-              description: "Organization-wide shared knowledge and standards",
-              maintainer: "platform-team@company.com",
-              tags: ["standards", "organization"]
-            }
-          },
+        org_standards: {
+          repo: "https://github.com/goldbergyoni/nodebestpractices.git",
+          branch: "master",
+          local_cache: "./.bmad-fks-cache/org-standards",
+          sync_policy: "daily",
+          priority: 1,
+          metadata: {
+            description: "Organization-wide shared knowledge and standards (using Node.js best practices repo as example)",
+            maintainer: "platform-team@company.com",
+            tags: ["standards", "organization", "nodejs"]
+          }
+        },
           
-          industry_templates: {
-            repo: "git@github.com:bmad-community/software-templates.git",
-            branch: "stable",
-            local_cache: "./bmad-cache/industry",
-            sync_policy: "weekly",
-            priority: 0,
-            filters: {
-              include: ["templates/**", "workflows/**"],
-              exclude: ["*.tmp", "*.log"]
-            },
+        industry_templates: {
+          repo: "https://github.com/cookiecutter/cookiecutter.git",
+          branch: "main",
+          local_cache: "./.bmad-fks-cache/industry",
+          sync_policy: "weekly",
+          priority: 0,
+          filters: {
+            include: ["*"],
+            exclude: ["*.tmp", "*.log"]
+          },
             metadata: {
               description: "Industry best practices and templates",
               maintainer: "bmad-community",

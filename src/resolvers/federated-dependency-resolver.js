@@ -9,8 +9,8 @@ const { ConfigValidator } = require('../schemas/config-validator');
 class FederatedDependencyResolver {
   constructor(options = {}) {
     this.options = {
-      configPath: './bmad-core/core-config.yaml',
-      cacheDir: './bmad-cache',
+      configPath: './.bmad-fks-core/fks-core-config.yaml',
+      cacheDir: './bmad-fks-cache',
       parallelSync: true,
       ...options
     };

@@ -2,7 +2,6 @@
  * BMAD Federated Knowledge System
  * Main entry point for the Git-Based Federated Knowledge System extension
  * 
- * @author BMAD Community
  * @version 1.0.0
  */
 
@@ -11,13 +10,14 @@ const { GitManager } = require('./managers/git-manager');
 const { ConfigValidator } = require('./schemas/config-validator');
 const { KnowledgeMerger } = require('./core/knowledge-merger');
 const { Logger } = require('./core/logger');
-
+const fs = require('fs');
+const path = require('path');
 class BmadFederatedKnowledge {
   constructor(options = {}) {
     this.options = {
       logLevel: 'info',
-      cacheDir: './bmad-cache',
-      configPath: './bmad-core/core-config.yaml',
+      cacheDir: './.bmad-fks-cache',
+      configPath: './.bmad-fks-core/fks-core-config.yaml',
       ...options
     };
 
@@ -31,8 +31,41 @@ class BmadFederatedKnowledge {
       logger: this.logger,
       ...this.options
     });
+       // Ensure .gitignore contains required directories
+    this.ensureGitignore([
+      this.options.cacheDir,
+      path.dirname(this.options.configPath) // .bmad-fks-core
+    ]);
   }
 
+   ensureGitignore(dirs) {
+    try {
+      const gitignorePath = path.resolve(process.cwd(), '.gitignore');
+      let content = '';
+
+      if (fs.existsSync(gitignorePath)) {
+        content = fs.readFileSync(gitignorePath, 'utf8');
+      }
+
+      const lines = content.split(/\r?\n/);
+      let updated = false;
+
+      dirs.forEach((dir) => {
+        const normalized = dir.endsWith('/') ? dir : dir + '/';
+        if (!lines.includes(normalized)) {
+          lines.push(normalized);
+          updated = true;
+        }
+      });
+
+      if (updated) {
+        fs.writeFileSync(gitignorePath, lines.join('\n'), 'utf8');
+        this.logger.info(`Updated .gitignore with BMAD directories: ${dirs.join(', ')}`);
+      }
+    } catch (err) {
+      this.logger.warn('Could not update .gitignore automatically:', err.message);
+    }
+  }
   /**
    * Initialize the federated knowledge system
    * @param {Object} config - Configuration object
@@ -112,6 +145,7 @@ class BmadFederatedKnowledge {
     return await this.gitManager.cleanCache(repoName);
   }
 }
+
 
 module.exports = {
   BmadFederatedKnowledge,
