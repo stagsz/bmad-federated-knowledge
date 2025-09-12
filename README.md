@@ -1,6 +1,7 @@
 # BMAD Federated Knowledge System
 
-A Git-based federated knowledge system extension for BMAD-METHOD that enables distributed knowledge management across multiple repositories.
+A Git-based federated knowledge system extension for BMAD-METHOD that enables distributed knowledge management across multiple repositories.  
+You can read the associated article for this code [here](https://medium.com/@visrow/bmad-method-and-agent-as-code-scaling-federated-knowledge-architecture-d85e5fe682cb)
 
 ## 🚀 Features
 
@@ -293,6 +294,31 @@ Or set environment variable:
 export BMAD_LOG_LEVEL=debug
 bmad-fed status
 ```
+
+## Multi-Repository Context Enhancement Workflow
+
+When your logic spans multiple repositories, use this workflow:
+
+Sync repositories:  
+
+```bash 
+  bmad-fed sync
+```
+
+Flatten each relevant repository:
+
+```bash 
+   npx bmad-method flatten -i .\.bmad-fks-cache\backend-templates
+   npx bmad-method flatten -i .\.bmad-fks-cache\frontend-components  
+   npx bmad-method flatten -i .\.bmad-fks-cache\shared-workflows
+```
+
+Use XML files for context enhancement:
+
+Load XML files into your AI context  
+Reference cross-repository knowledge  
+Maintain consistency across distributed logic  
+Enable intelligent code generation spanning multiple repos  
 
 ## 🤝 Contributing
 
