@@ -335,17 +335,10 @@ Enable intelligent code generation spanning multiple repos
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Run the test suite
-6. Submit a pull request
+2. Make sure you dont break anything
+3. Add your features :-) 
+3. Submit a pull request
 
 
 
-## 🆘 Support
-
-- GitHub Issues: [Report bugs and request features](https://github.com/bmad-community/bmad-federated-knowledge/issues)
-- Documentation: [Full documentation](https://github.com/bmad-community/bmad-federated-knowledge/wiki)
-- Community: [Join the discussion](https://github.com/bmad-community/bmad-federated-knowledge/discussions)
 
