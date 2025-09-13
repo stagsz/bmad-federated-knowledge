@@ -290,6 +290,41 @@ class FederatedDependencyResolver {
     };
   }
 
+  async addKnowledgeSource(name, config) {
+    try {
+      // Validate config by type
+      const validatedConfig = await this.configValidator.validateKnowledgeConfig(config);
+
+      // Track in memory
+      this.federatedRepos.set(name, {
+        ...validatedConfig,
+        name,
+        status: 'added',
+        lastSync: null,
+        syncInProgress: false
+      });
+
+      // Update config file
+      if (!this.config.bmad_config.knowledge_sources) {
+        this.config.bmad_config.knowledge_sources = {};
+      }
+      this.config.bmad_config.knowledge_sources[name] = validatedConfig;
+
+      await this.saveConfiguration();
+
+      this.logger.info(`Added knowledge source: ${name}`);
+
+      // Git sources can sync; web/db might have custom sync
+      if (validatedConfig.type === 'git') {
+        await this.syncRepository(name, this.federatedRepos.get(name));
+      }
+    } catch (error) {
+      this.logger.error(`Failed to add knowledge source ${name}:`, error);
+      throw error;
+    }
+  }
+
+
   /**
    * Add a new federated repository
    * @param {string} name - Repository name

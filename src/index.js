@@ -33,9 +33,9 @@ class BmadFederatedKnowledge {
     });
        // Ensure .gitignore contains required directories
     this.ensureGitignore([
-      this.options.cacheDir,
-      path.dirname(this.options.configPath) // .bmad-fks-core
-    ]);
+      this.options.cacheDir])
+      //path.dirname(this.options.configPath) // .bmad-fks-core
+    //]);
   }
 
    ensureGitignore(dirs) {
@@ -118,6 +118,20 @@ class BmadFederatedKnowledge {
     await this.configValidator.validateRepositoryConfig(config);
     return await this.dependencyResolver.addRepository(name, config);
   }
+
+  async addKnowledgeSource(name, config) {
+    try {
+      // Validate config by type
+      const validatedConfig = await this.configValidator.validateKnowledgeConfig(config);
+      return await this.dependencyResolver.addKnowledgeSource(name, config);
+      // Track in memory
+
+    } catch (error) {
+      this.logger.error(`Failed to add knowledge source ${name}:`, error);
+      throw error;
+    }
+  }
+
 
   /**
    * Remove a federated repository

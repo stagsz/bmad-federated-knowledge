@@ -175,6 +175,109 @@ program
     }
   });
 
+program
+    .command('add-knowledge <name>')
+    .description('Add a new knowledge source (web, database)')
+    .option('-t, --type <type>', 'Type of knowledge source (web|database)')
+    // Web options
+    .option('--url <url>', 'Webpage URL')
+    // Database options
+    .option('--connection <string>', 'Database connection string')
+    .option('--query <sql>', 'SQL query for extracting knowledge')
+    // Common options
+    .option('-p, --priority <number>', 'Priority (0-999)', '0')
+    .option('--interactive', 'Interactive mode')
+    .action(async (name, options) => {
+      try {
+        await bmadFed.initialize();
+        let sourceConfig = {};
+
+        if (options.interactive || !options.type) {
+          // === INTERACTIVE MODE ===
+          const answers = await inquirer.prompt([
+            {
+              type: 'list',
+              name: 'type',
+              message: 'Select knowledge source type:',
+              choices: ['web', 'database'],
+              default: options.type
+            },
+            {
+              type: 'input',
+              name: 'url',
+              message: 'Webpage URL:',
+              when: (a) => a.type === 'web',
+              validate: (input) =>
+                  input.trim() !== '' || 'Web URL is required'
+            },
+            {
+              type: 'input',
+              name: 'connection',
+              message: 'Database connection string:',
+              when: (a) => a.type === 'database',
+              validate: (input) =>
+                  input.trim() !== '' || 'Connection string is required'
+            },
+            {
+              type: 'input',
+              name: 'query',
+              message: 'SQL query:',
+              when: (a) => a.type === 'database',
+              default: 'SELECT * FROM knowledge'
+            },
+            {
+              type: 'number',
+              name: 'priority',
+              message: 'Priority (0-999):',
+              default: parseInt(options.priority) || 0,
+              validate: (input) =>
+                  (input >= 0 && input <= 999) || 'Priority must be between 0 and 999'
+            },
+            {
+              type: 'input',
+              name: 'description',
+              message: 'Description (optional):'
+            }
+          ]);
+
+          sourceConfig = {
+            type: answers.type,
+            priority: answers.priority,
+            ...(answers.url && { url: answers.url }),
+            ...(answers.connection && { connection: answers.connection }),
+            ...(answers.query && { query: answers.query }),
+            ...(answers.description && { metadata: { description: answers.description } })
+          };
+        } else {
+          // === NON-INTERACTIVE MODE ===
+          sourceConfig = {
+            type: options.type,
+            priority: parseInt(options.priority),
+            ...(options.url && { url: options.url }),
+            ...(options.connection && { connection: options.connection }),
+            ...(options.query && { query: options.query })
+          };
+
+          // Validate non-interactive requirements
+          if (options.type === 'web' && !options.url) {
+            console.error(chalk.red('Web URL is required for type=web'));
+            process.exit(1);
+          }
+          if (options.type === 'database' && !options.connection) {
+            console.error(chalk.red('Database connection string is required for type=database'));
+            process.exit(1);
+          }
+        }
+
+        const spinner = ora(`Adding knowledge source: ${name}`).start();
+        await bmadFed.addKnowledgeSource(name, sourceConfig);
+        spinner.succeed(chalk.green(`Knowledge source "${name}" added successfully!`));
+      } catch (error) {
+        console.error(chalk.red(`Failed to add knowledge: ${error.message}`));
+        process.exit(1);
+      }
+    });
+
 /**
  * Remove repository command
  */

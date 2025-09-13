@@ -36,6 +36,20 @@ class ConfigValidator {
         tags: Joi.array().items(Joi.string()).default([])
       }).optional()
     });
+    this.webSchema = Joi.object({
+      type: Joi.string().valid('web').required(),
+      url: Joi.string().uri().required(),
+      priority: Joi.number().min(0).max(999).default(0),
+      metadata: Joi.object().optional()
+    });
+
+    this.dbSchema = Joi.object({
+      type: Joi.string().valid('database').required(),
+      connection: Joi.string().required(),
+      query: Joi.string().default('SELECT * FROM knowledge'),
+      priority: Joi.number().min(0).max(999).default(0),
+      metadata: Joi.object().optional()
+    });
 
     this.enhancedConfigSchema = Joi.object({
       bmad_config: Joi.object({
@@ -70,6 +84,19 @@ class ConfigValidator {
         devLoadAlwaysFiles: Joi.array().optional()
       }).required()
     });
+  }
+
+  async validateKnowledgeConfig(config) {
+    switch (config.type) {
+      case 'git':
+        return this.gitSchema.validateAsync(config);
+      case 'web':
+        return this.webSchema.validateAsync(config);
+      case 'database':
+        return this.dbSchema.validateAsync(config);
+      default:
+        throw new Error(`Unknown knowledge source type: ${config.type}`);
+    }
   }
 
   /**
