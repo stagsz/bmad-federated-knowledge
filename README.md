@@ -117,6 +117,52 @@ bmad-fed status
 bmad-fed status --verbose
 ```
 
+### 5 . Add a webpage or other knowledge source
+
+```bash 
+npx bmad-fed add-knowledge global_warming
+```
+and then provide all the details
+
+```
+
+C:\work\comicsforall>npx bmad-fed add-knowledge global_warming
+2025-09-14 09:31:02 [info]: Initializing BMAD Federated Knowledge System... {"service":"bmad-federated-knowledge"}
+2025-09-14 09:31:02 [info]: Git Manager initialized with cache directory: ./.bmad-fks-cache {"service":"bmad-federated-knowledge"}
+2025-09-14 09:31:02 [info]: Initializing Federated Dependency Resolver... {"service":"bmad-federated-knowledge"}
+2025-09-14 09:31:02 [info]: Configuration loaded from ./.bmad-fks-core/fks-core-config.yaml {"service":"bmad-federated-knowledge"}
+2025-09-14 09:31:02 [info]: Initialized 4 federated repositories {"service":"bmad-federated-knowledge"}
+2025-09-14 09:31:02 [info]: Federated Dependency Resolver initialized successfully {"service":"bmad-federated-knowledge"}
+2025-09-14 09:31:02 [info]: BMAD Federated Knowledge System initialized successfully {"service":"bmad-federated-knowledge"}
+? Select knowledge source type: web
+? Webpage URL: https://www.nrdc.org/stories/global-warming-101
+? Priority (0-999): 1
+? Description (optional): knowledge on global warming
+- Adding knowledge source: global_warming2025-09-14 09:32:42 [info]: Added knowledge source: global_warming {"service":"bmad-federated-knowledge"}
+Syncing webpage: https://www.nrdc.org/stories/global-warming-101
+- Adding knowledge source: global_warmingWebpage https://www.nrdc.org/stories/global-warming-101 saved to C:\work\comicsforall\.bmad-fks-cache\global_warming.pdf
+√ Knowledge source "global_warming" added successfully!
+```
+
+### 6. Resolve Knowledge
+
+```bash
+C:\work\comicsforall>npx bmad-fed sync-web global_warming
+2025-09-14 09:33:47 [info]: Initializing BMAD Federated Knowledge System... {"service":"bmad-federated-knowledge"}
+2025-09-14 09:33:47 [info]: Git Manager initialized with cache directory: ./.bmad-fks-cache {"service":"bmad-federated-knowledge"}
+2025-09-14 09:33:47 [info]: Initializing Federated Dependency Resolver... {"service":"bmad-federated-knowledge"}
+2025-09-14 09:33:47 [info]: Configuration loaded from ./.bmad-fks-core/fks-core-config.yaml {"service":"bmad-federated-knowledge"}
+2025-09-14 09:33:47 [info]: Initialized 4 federated repositories {"service":"bmad-federated-knowledge"}
+2025-09-14 09:33:47 [info]: Federated Dependency Resolver initialized successfully {"service":"bmad-federated-knowledge"}
+2025-09-14 09:33:47 [info]: BMAD Federated Knowledge System initialized successfully {"service":"bmad-federated-knowledge"}
+- Syncing repository: global_warmingSyncing webpage: https://www.nrdc.org/stories/global-warming-101
+/ Syncing repository: global_warmingWebpage https://www.nrdc.org/stories/global-warming-101 saved to C:\work\comicsforall\.bmad-fks-cache\global_warming.pdf
+√ Wep page "global_warming" synced successfully!
+
+```
+
+as you can see the webpage is saved as a pdf in the cache folder this you can use with you analyst agent as additional context
+
 ## 📚 API Usage
 
 ### Basic Usage
