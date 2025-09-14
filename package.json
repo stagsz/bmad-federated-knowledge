@@ -51,6 +51,7 @@
     "lodash": "^4.17.21",
     "node-cron": "^3.0.3",
     "ora": "^5.4.1",
+    "puppeteer": "^24.20.0",
     "semver": "^7.5.4",
     "simple-git": "^3.20.0",
     "winston": "^3.11.0",

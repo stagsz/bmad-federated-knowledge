@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const { ConfigValidator } = require('../schemas/config-validator');
 
+const puppeteer = require("puppeteer");
 /**
  * Federated Dependency Resolver
  * Extends BMAD's dependency resolution to support federated knowledge repositories
@@ -317,6 +318,8 @@ class FederatedDependencyResolver {
       // Git sources can sync; web/db might have custom sync
       if (validatedConfig.type === 'git') {
         await this.syncRepository(name, this.federatedRepos.get(name));
+      } else if (validatedConfig.type === 'web') {
+        await this.getWeb(name, validatedConfig);
       }
     } catch (error) {
       this.logger.error(`Failed to add knowledge source ${name}:`, error);
@@ -324,6 +327,41 @@ class FederatedDependencyResolver {
     }
   }
 
+
+
+  async  getWeb(name, config) {
+    try {
+      // Skip if not needed
+      if (!this.shouldSync(name, config)) {
+        console.log(`Skipping web sync for ${name}`);
+        return { status: "skipped" };
+      }
+
+      console.log(`Syncing webpage: ${config.url}`);
+
+      const browser = await puppeteer.launch();
+      const page = await browser.newPage();
+      await page.goto(config.url, { waitUntil: "networkidle2" });
+
+      const cacheDir = path.resolve("./.bmad-fks-cache");
+      if (!fs.existsSync(cacheDir)) fs.mkdirSync(cacheDir);
+
+      const pdfPath = path.join(cacheDir, `${name}.pdf`);
+      await page.pdf({ path: pdfPath, format: "A4" });
+
+      await browser.close();
+
+      config.lastSync = Date.now();
+      config.status = "success";
+
+      console.log(`Webpage ${config.url} saved to ${pdfPath}`);
+      return { status: "success", file: pdfPath };
+    } catch (err) {
+      console.error(`Failed to sync webpage for ${name}:`, err);
+      config.status = "error";
+      throw err;
+    }
+  }
 
   /**
    * Add a new federated repository

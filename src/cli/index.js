@@ -312,6 +312,37 @@ program
       process.exit(1);
     }
   });
+program
+    .command("sync-web <name>")
+    .description("Sync webpage as PDF into cache")
+    .action(async (name) => {
+      try {
+        await bmadFed.initialize();
+
+        if (name) {
+          // Sync specific repository
+          const spinner = ora(`Syncing repository: ${name}`).start();
+
+          const result = await bmadFed.dependencyResolver.getWeb(
+              name,
+              bmadFed.dependencyResolver.config.bmad_config.knowledge_sources[name]
+          );
+
+          if (result.status === 'success') {
+            spinner.succeed(chalk.green(`Wep page "${name}" synced successfully!`));
+          } else {
+            spinner.fail(chalk.red(`Failed to sync webpage "${name}"`));
+            console.error(chalk.red(result.error || 'Unknown error'));
+          }
+        } else {
+          //TODO Sync all pages
+
+        }
+      } catch (error) {
+        console.error(chalk.red(`Sync failed: ${error.message}`));
+        process.exit(1);
+      }
+    });
 
 /**
  * Sync command
