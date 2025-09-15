@@ -163,6 +163,15 @@ C:\work\comicsforall>npx bmad-fed sync-web global_warming
 
 as you can see the webpage is saved as a pdf in the cache folder this you can use with you analyst agent as additional context
 
+### 7. Build entire context
+
+```bash
+npx bmad-fed build-context
+```
+
+This will build the entire context from all the federated knowledge sources including webpages and git repos  this context can then be used by your agents
+Context is thee single most essential element for development. An AI model's ability to produce relevant, accurate code is directly tied to its understanding of the "why" and "how" behind a task. Context isn't just the prompt you type; it is a comprehensive ecosystem
+
 ## 📚 API Usage
 
 ### Basic Usage
