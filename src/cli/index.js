@@ -8,7 +8,7 @@ const { BmadFederatedKnowledge } = require('../index');
 const { ConfigValidator } = require('../schemas/config-validator');
 const fs = require('fs-extra');
 const path = require('path');
-
+const { spawn } = require('child_process');
 const program = new Command();
 const bmadFed = new BmadFederatedKnowledge();
 const configValidator = new ConfigValidator();
@@ -80,6 +80,149 @@ program
       process.exit(1);
     }
   });
+
+
+program
+    .command('build-context')
+    .description('Build full context by syncing repos, syncing web sources, and flattening cache')
+    .action(async () => {
+      try {
+        await bmadFed.initialize();
+
+        // === 1. Sync repos ===
+        let spinner = ora('Syncing all repositories...').start();
+        const syncResults = await bmadFed.syncAll();
+        spinner.succeed(chalk.green(
+            `Repos synced: ${syncResults.summary.successful} successful, ${syncResults.summary.failed} failed`
+        ));
+
+        let contextEntries = [];
+
+        // === 2. Sync web sources ===
+        spinner = ora('Syncing all web knowledge sources...').start();
+        const webSources = bmadFed.dependencyResolver.config.bmad_config.knowledge_sources || {};
+        for (const [name, config] of Object.entries(webSources)) {
+          if (config.type === 'web') {
+            try {
+              const result = await bmadFed.dependencyResolver.getWeb(name, config);
+              if (result.status === 'success') {
+                console.log(chalk.green(`✓ Web source "${name}" synced`));
+
+                // Add web source to context entries
+                const description = config.metadata?.description || 'No description provided';
+                contextEntries.push({
+                  name,
+                  file: result.filePath || `./.bmad-fks-cache/${name}.pdf`, // Assuming getWeb returns filePath
+                  description,
+                  type: 'web',
+                  url: config.url
+                });
+              } else {
+                console.log(chalk.red(`✗ Failed to sync web source "${name}"`));
+              }
+            } catch (err) {
+              console.log(chalk.red(`✗ Error syncing web source "${name}": ${err.message}`));
+            }
+          }
+        }
+        spinner.succeed(chalk.green('Web sources sync completed.'));
+
+        // === 3. Flatten repos + build context.md entries ===
+        spinner = ora('Flattening repositories into context files...').start();
+        const { spawn } = require('child_process');
+        const repos = bmadFed.dependencyResolver.getFederatedRepos();
+
+        for (const [name, config] of repos.entries()) {
+          const cachePath = config.local_cache || `./.bmad-fks-cache/${name}`;
+          const outputFile = `./.bmad-fks-cache/${name}.xml`;
+
+          console.log(chalk.blue(`\n🔄 Flattening repo "${name}" → ${outputFile}`));
+
+          await new Promise((resolve, reject) => {
+            const child = spawn('npx', ['bmad-method', 'flatten', '-i', cachePath, '-o', outputFile], {
+              shell: true
+            });
+
+            child.stdout.on('data', (data) => {
+              process.stdout.write(chalk.gray(data.toString()));
+              if (data.toString().includes('Completion Summary:')) {
+                setTimeout(() => resolve(), 200);
+              }
+            });
+
+            child.stderr.on('data', (data) => {
+              process.stderr.write(chalk.red(data.toString()));
+            });
+
+            child.on('error', (err) => reject(err));
+            child.on('close', (code) => {
+              if (code !== 0) return reject(new Error(`Flatten failed for ${name}`));
+              resolve();
+            });
+
+            child.stdin.end();
+          });
+
+          console.log(chalk.green(`✓ Flattened ${name} → ${outputFile}`));
+
+          // Get description from config if available
+          const description = config.metadata?.description || 'No description provided';
+          contextEntries.push({
+            name,
+            file: outputFile,
+            description,
+            type: 'repo',
+            repo: config.repo
+          });
+        }
+
+        spinner.succeed(chalk.green('Context built successfully for all repos!'));
+
+        // === 4. Write context.md ===
+        const contextMd = [
+          '# Context Definition File',
+          '',
+          'This file maps each knowledge source to its file, along with descriptions.',
+          ''
+        ];
+
+        // Group by type for better organization
+        const repoEntries = contextEntries.filter(e => e.type === 'repo');
+        const webEntries = contextEntries.filter(e => e.type === 'web');
+
+        if (repoEntries.length > 0) {
+          contextMd.push('## Repository Sources');
+          contextMd.push('');
+          for (const entry of repoEntries) {
+            contextMd.push(`### ${entry.name}`);
+            contextMd.push(`- **File**: ${entry.file}`);
+            contextMd.push(`- **Repository**: ${entry.repo}`);
+            contextMd.push(`- **Description**: ${entry.description}`);
+            contextMd.push('');
+          }
+        }
+
+        if (webEntries.length > 0) {
+          contextMd.push('## Web Sources');
+          contextMd.push('');
+          for (const entry of webEntries) {
+            contextMd.push(`### ${entry.name}`);
+            contextMd.push(`- **File**: ${entry.file}`);
+            contextMd.push(`- **URL**: ${entry.url}`);
+            contextMd.push(`- **Description**: ${entry.description}`);
+            contextMd.push('');
+          }
+        }
+
+        const contextPath = path.join(process.cwd(), 'context.md');
+        await fs.writeFile(contextPath, contextMd.join('\n'), 'utf8');
+        console.log(chalk.blue(`\n📄 Context definition written to ${contextPath}`));
+
+      } catch (error) {
+        console.error(chalk.red(`Build-context failed: ${error.message}`));
+        process.exit(1);
+      }
+    });
 
 /**
  * Add repository command
