@@ -1,6 +1,6 @@
 {
   "name": "bmad-federated-knowledge",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Git-Based Federated Knowledge System extension for BMAD-METHOD",
   "main": "src/index.js",
   "bin": {
