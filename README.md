@@ -170,9 +170,10 @@ npx bmad-fed build-context
 ```
 
 This will build the entire context from all the federated knowledge sources including webpages and git repos  this context can then be used by your agents
-Context is the single most essential element for development. An AI model's ability to produce relevant, accurate code is directly tied to its understanding of the "why" and "how" behind a task. Context isn't just the prompt you type; it is a comprehensive ecosystem  
+Context is the single most essential element for development.   
+An AI model's ability to produce relevant, accurate code is directly tied to its understanding of the "why" and "how" behind a task. Context isn't just the prompt you type; it is a comprehensive ecosystem  
 once you run the above command it will synch the knowledge repos and the web pages and then flatten all the knowledge into xml files that can be used by your agents .
-The xml files are stored in the .bmad-fks-core/core-data/federated-knowledge folder . and the context file will be on the root folder 
+The xml files are stored in the ```.bmad-fks-core/core-data/federated-knowledge``` folder  and the context file will be on the root folder 
 
 
 ## 📚 API Usage
