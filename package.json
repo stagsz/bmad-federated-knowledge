@@ -1,6 +1,6 @@
 {
   "name": "bmad-federated-knowledge",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Git-Based Federated Knowledge System extension for BMAD-METHOD",
   "main": "src/index.js",
   "bin": {
@@ -48,6 +48,10 @@
     "fs-extra": "^11.1.1",
     "inquirer": "^8.2.6",
     "joi": "^17.11.0",
+    "pdfkit": "^0.14.0",
+    "mongodb": "^6.3.0",
+    "mysql2": "^3.6.5",
+    "pg": "^8.11.3",
     "lodash": "^4.17.21",
     "node-cron": "^3.0.3",
     "ora": "^5.4.1",

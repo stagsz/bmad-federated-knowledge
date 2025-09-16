@@ -1,0 +1,47 @@
+# BMAD Federated Knowledge System - Core Configuration
+bmad_config:
+  version: "2.0"
+  
+  # Local knowledge
+  local_knowledge:
+    core_data: "./bmad-core/core-data"
+    templates: "./bmad-core/templates"
+    workflows: "./bmad-core/workflows"
+  
+  # Federated settings
+  federated_settings:
+    cache_root: "./bmad-cache"
+    sync_schedule: "daily"
+    conflict_resolution: "priority"
+  
+  # Connections
+  connections:
+    mongodb_test:
+      type: "mongodb"
+      connection_string: "mongodb://localhost:27017/test"
+      metadata:
+        description: "Local MongoDB test database"
+    mongodb_atlas:
+      type: "mongodb"
+      connection_string: "mongodb+srv://cookmock:ddaddfa@cookgpt.njdar.mongodb.net/?retryWrites=true&w=majority&appName=employeedb"
+      metadata:
+        description: "MongoDB Atlas cluster with employee data"
+  
+  # Knowledge sources
+  knowledge_sources:
+    mongo_users:
+      type: "database"
+      connection_ref: "mongodb_test"
+      query: "SELECT * FROM users WHERE active = true"
+      sync_policy: "daily"
+      metadata:
+        description: "Active users from MongoDB test database"
+        tags: ["users", "mongodb", "test"]
+    atlas_employees:
+      type: "database"
+      connection_ref: "mongodb_atlas"
+      query: "SELECT * FROM employee"
+      sync_policy: "daily"
+      metadata:
+        description: "Employee data from MongoDB Atlas"
+        tags: ["employees", "mongodb", "atlas"]

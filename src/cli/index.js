@@ -9,6 +9,9 @@ const { ConfigValidator } = require('../schemas/config-validator');
 const fs = require('fs-extra');
 const path = require('path');
 const { spawn } = require('child_process');
+const { registerAddKnowledgeCommand } = require('./add-knowledge-command');
+const { registerConnectionCommands } = require('./connection-commands');
+const { registerSyncDbCommand } = require('./sync-db-command');
 const program = new Command();
 const bmadFed = new BmadFederatedKnowledge();
 const configValidator = new ConfigValidator();
@@ -84,7 +87,7 @@ program
 
 program
     .command('build-context')
-    .description('Build full context by syncing repos, syncing web sources, and flattening cache')
+    .description('Build full context by syncing repos, syncing web sources, syncing database sources, and flattening cache')
     .action(async () => {
       try {
         await bmadFed.initialize();
@@ -97,8 +100,34 @@ program
         ));
 
         let contextEntries = [];
+        
+        // === 2. Sync database sources ===
+        spinner = ora('Syncing all database knowledge sources...').start();
+        
+        try {
+          // Use the sync-db functionality directly instead of spawning a process
+          const { registerSyncDbCommand } = require('./sync-db-command');
+          
+          // Create a temporary Command instance to capture the sync-db action
+          const tempProgram = new Command();
+          registerSyncDbCommand(tempProgram, bmadFed);
+          
+          // Find the command and execute its action directly
+          const syncDbCommand = tempProgram.commands.find(cmd => cmd.name() === 'sync-db');
+          if (syncDbCommand && syncDbCommand._actionHandler) {
+            // Execute with mock option enabled
+            await syncDbCommand._actionHandler({ all: true, mock: true }, {});
+            spinner.succeed(chalk.green('Database sources sync completed.'));
+          } else {
+            console.log(chalk.yellow('Could not find sync-db command handler, skipping database sync.'));
+            spinner.info(chalk.yellow('Database sources sync skipped.'));
+          }
+        } catch (err) {
+          console.log(chalk.yellow(`Database sync error: ${err.message}`));
+          spinner.warn(chalk.yellow('Database sources sync had errors but continuing.'));
+        }
 
-        // === 2. Sync web sources ===
+        // === 3. Sync web sources ===
         spinner = ora('Syncing all web knowledge sources...').start();
         const webSources = bmadFed.dependencyResolver.config.bmad_config.knowledge_sources || {};
         for (const [name, config] of Object.entries(webSources)) {
@@ -127,9 +156,8 @@ program
         }
         spinner.succeed(chalk.green('Web sources sync completed.'));
 
-        // === 3. Flatten repos + build context.md entries ===
+        // === 4. Flatten repos + build context.md entries ===
         spinner = ora('Flattening repositories into context files...').start();
-        const { spawn } = require('child_process');
         const repos = bmadFed.dependencyResolver.getFederatedRepos();
 
         for (const [name, config] of repos.entries()) {
@@ -209,6 +237,51 @@ program
             contextMd.push(`### ${entry.name}`);
             contextMd.push(`- **File**: ${entry.file}`);
             contextMd.push(`- **URL**: ${entry.url}`);
+            contextMd.push(`- **Description**: ${entry.description}`);
+            contextMd.push('');
+          }
+        }
+
+        // Add database sources to context entries
+        const dbSources = bmadFed.dependencyResolver.config.bmad_config.knowledge_sources || {};
+        const dbEntries = [];
+
+        for (const [name, config] of Object.entries(dbSources)) {
+          if (config.type === 'database') {
+            const cacheRoot = bmadFed.dependencyResolver.config.bmad_config.federated_settings?.cache_root || './bmad-fks-cache';
+            const cachePath = path.join(cacheRoot, 'db-knowledge');
+            // Check if PDF or JSON exists
+            const pdfPath = path.join(cachePath, `${name}.pdf`);
+            const jsonPath = path.join(cachePath, `${name}.json`);
+            
+            let filePath;
+            if (await fs.pathExists(pdfPath)) {
+              filePath = pdfPath;
+            } else if (await fs.pathExists(jsonPath)) {
+              filePath = jsonPath;
+            } else {
+              filePath = `${cachePath}/${name}.pdf`; // Default path even if not yet created
+            }
+            
+            dbEntries.push({
+              name,
+              file: filePath,
+              description: config.metadata?.description || 'No description provided',
+              type: 'database',
+              connection: config.connection_ref,
+              query: config.query
+            });
+          }
+        }
+
+        if (dbEntries.length > 0) {
+          contextMd.push('## Database Sources');
+          contextMd.push('');
+          for (const entry of dbEntries) {
+            contextMd.push(`### ${entry.name}`);
+            contextMd.push(`- **File**: ${entry.file}`);
+            contextMd.push(`- **Connection**: ${entry.connection}`);
+            contextMd.push(`- **Query**: ${entry.query}`);
             contextMd.push(`- **Description**: ${entry.description}`);
             contextMd.push('');
           }
@@ -299,7 +372,7 @@ program
         repoConfig = {
           repo: options.repo,
           branch: options.branch,
-          local_cache: options.cache || `./bmad-cache/${name}`,
+          local_cache: options.cache || `./.bmad-fks-cache/${name}`,
           sync_policy: options.syncPolicy,
           priority: parseInt(options.priority)
         };
@@ -318,108 +391,7 @@ program
     }
   });
 
-program
-    .command('add-knowledge <name>')
-    .description('Add a new knowledge source (web, database)')
-    .option('-t, --type <type>', 'Type of knowledge source (web|database)')
-    // Web options
-    .option('--url <url>', 'Webpage URL')
-    // Database options
-    .option('--connection <string>', 'Database connection string')
-    .option('--query <sql>', 'SQL query for extracting knowledge')
-    // Common options
-    .option('-p, --priority <number>', 'Priority (0-999)', '0')
-    .option('--interactive', 'Interactive mode')
-    .action(async (name, options) => {
-      try {
-        await bmadFed.initialize();
-        let sourceConfig = {};
-
-        if (options.interactive || !options.type) {
-          // === INTERACTIVE MODE ===
-          const answers = await inquirer.prompt([
-            {
-              type: 'list',
-              name: 'type',
-              message: 'Select knowledge source type:',
-              choices: ['web', 'database'],
-              default: options.type
-            },
-            {
-              type: 'input',
-              name: 'url',
-              message: 'Webpage URL:',
-              when: (a) => a.type === 'web',
-              validate: (input) =>
-                  input.trim() !== '' || 'Web URL is required'
-            },
-            {
-              type: 'input',
-              name: 'connection',
-              message: 'Database connection string:',
-              when: (a) => a.type === 'database',
-              validate: (input) =>
-                  input.trim() !== '' || 'Connection string is required'
-            },
-            {
-              type: 'input',
-              name: 'query',
-              message: 'SQL query:',
-              when: (a) => a.type === 'database',
-              default: 'SELECT * FROM knowledge'
-            },
-            {
-              type: 'number',
-              name: 'priority',
-              message: 'Priority (0-999):',
-              default: parseInt(options.priority) || 0,
-              validate: (input) =>
-                  (input >= 0 && input <= 999) || 'Priority must be between 0 and 999'
-            },
-            {
-              type: 'input',
-              name: 'description',
-              message: 'Description (optional):'
-            }
-          ]);
-
-          sourceConfig = {
-            type: answers.type,
-            priority: answers.priority,
-            ...(answers.url && { url: answers.url }),
-            ...(answers.connection && { connection: answers.connection }),
-            ...(answers.query && { query: answers.query }),
-            ...(answers.description && { metadata: { description: answers.description } })
-          };
-        } else {
-          // === NON-INTERACTIVE MODE ===
-          sourceConfig = {
-            type: options.type,
-            priority: parseInt(options.priority),
-            ...(options.url && { url: options.url }),
-            ...(options.connection && { connection: options.connection }),
-            ...(options.query && { query: options.query })
-          };
-
-          // Validate non-interactive requirements
-          if (options.type === 'web' && !options.url) {
-            console.error(chalk.red('Web URL is required for type=web'));
-            process.exit(1);
-          }
-          if (options.type === 'database' && !options.connection) {
-            console.error(chalk.red('Database connection string is required for type=database'));
-            process.exit(1);
-          }
-        }
-
-        const spinner = ora(`Adding knowledge source: ${name}`).start();
-        await bmadFed.addKnowledgeSource(name, sourceConfig);
-        spinner.succeed(chalk.green(`Knowledge source "${name}" added successfully!`));
-      } catch (error) {
-        console.error(chalk.red(`Failed to add knowledge: ${error.message}`));
-        process.exit(1);
-      }
-    });
+// add-knowledge command moved to add-knowledge-command.js
 
 /**
  * Remove repository command
@@ -700,6 +672,15 @@ program
       process.exit(1);
     }
   });
+
+// Register the knowledge command module
+registerAddKnowledgeCommand(program, bmadFed);
+
+// Register the connection commands
+registerConnectionCommands(program, bmadFed);
+
+// Register the sync-db command
+registerSyncDbCommand(program, bmadFed);
 
 // Handle unknown commands
 program.on('command:*', () => {

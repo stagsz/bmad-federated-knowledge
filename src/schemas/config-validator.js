@@ -45,7 +45,8 @@ class ConfigValidator {
 
     this.dbSchema = Joi.object({
       type: Joi.string().valid('database').required(),
-      connection: Joi.string().required(),
+      connection_ref: Joi.string().required()
+        .description('Reference to a connection defined in bmad_config.connections'),
       query: Joi.string().default('SELECT * FROM knowledge'),
       priority: Joi.number().min(0).max(999).default(0),
       metadata: Joi.object().optional()
@@ -70,13 +71,23 @@ class ConfigValidator {
 
         // Global federated settings
         federated_settings: Joi.object({
-          cache_root: Joi.string().default('./.bmad-cache'),
+          cache_root: Joi.string().default('./.bmad-fks-cache'),
           max_cache_size: Joi.string().default('1GB'),
           sync_timeout: Joi.number().default(300),
           retry_attempts: Joi.number().default(3),
           parallel_sync: Joi.boolean().default(true),
           conflict_resolution: Joi.string().valid('priority', 'manual', 'local_wins').default('priority')
         }).optional(),
+
+        // Database connections
+        connections: Joi.object().pattern(
+          Joi.string(),
+          Joi.object({
+            type: Joi.string().valid('mysql', 'postgresql', 'mongodb', 'oracle', 'sqlserver', 'sqlite').required(),
+            connection_string: Joi.string().required(),
+            description: Joi.string().optional()
+          })
+        ).optional(),
 
         // Existing bmad configuration
         agents: Joi.object().optional(),
