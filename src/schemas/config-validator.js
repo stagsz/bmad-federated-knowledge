@@ -83,7 +83,7 @@ class ConfigValidator {
         connections: Joi.object().pattern(
           Joi.string(),
           Joi.object({
-            type: Joi.string().valid('mysql', 'postgresql', 'mongodb', 'oracle', 'sqlserver', 'sqlite').required(),
+            type: Joi.string().valid('supabase', 'postgresql', 'mysql', 'mongodb', 'oracle', 'sqlserver', 'sqlite').required(),
             connection_string: Joi.string().required(),
             description: Joi.string().optional()
           })

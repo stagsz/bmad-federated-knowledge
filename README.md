@@ -103,12 +103,18 @@ bmad_config:
       
   # Database connections
   connections:
+    supabase_prod:
+      type: "supabase"
+      connection_string: "postgresql://postgres:password@db.project-ref.supabase.co:5432/postgres"
+      metadata:
+        description: "Production Supabase database"
+
     mongodb_prod:
       type: "mongodb"
       connection_string: "mongodb://username:password@host:27017/dbname"
       metadata:
         description: "Production MongoDB database"
-    
+
     mysql_analytics:
       type: "mysql"
       connection_string: "mysql://user:pass@host:3306/analytics"
@@ -148,20 +154,28 @@ bmad-fed init --config ./my-config.yaml
 ### Database Knowledge Sources
 
 ```bash
-# Add a database connection
-bmad-fed connection-add my-mongo -t mongodb -s "mongodb://localhost:27017/mydb"
+# Add a Supabase connection
+bmad-fed connection-add my-supabase -t supabase -s "postgresql://postgres:your-password@db.xyz.supabase.co:5432/postgres"
 
-# Add a database knowledge source
-bmad-fed add-knowledge employee_data -t database --connection-ref my-mongo --query "SELECT * FROM employees"
+# Add a database knowledge source from Supabase
+bmad-fed add-knowledge user_profiles -t database --connection-ref my-supabase --query "SELECT * FROM profiles WHERE active = true"
 
 # Sync database data to PDF (requires PDFKit)
-bmad-fed sync-db employee_data
+bmad-fed sync-db user_profiles
 
 # Or sync to JSON format
-bmad-fed sync-db employee_data --json
+bmad-fed sync-db user_profiles --json
 
 # Sync all database sources
 bmad-fed sync-db --all
+```
+
+You can also use MongoDB, MySQL, or PostgreSQL:
+```bash
+# MongoDB example
+bmad-fed connection-add my-mongo -t mongodb -s "mongodb://localhost:27017/mydb"
+bmad-fed add-knowledge employee_data -t database --connection-ref my-mongo --query "SELECT * FROM employees"
+bmad-fed sync-db employee_data
 ```
 
 ### 2. Add Federated Repositories
@@ -407,6 +421,11 @@ bmad-fed list [--json]
 ```bash
 # Add a database connection
 bmad-fed connection-add <name> -t <type> -s <connection-string>
+# Supported types: supabase, postgresql, mysql, mongodb
+
+# Examples:
+# Supabase
+bmad-fed connection-add my-supabase -t supabase -s "postgresql://postgres:pass@db.xyz.supabase.co:5432/postgres"
 
 # List all connections
 bmad-fed connection-list

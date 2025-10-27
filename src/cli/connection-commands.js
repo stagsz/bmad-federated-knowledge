@@ -51,13 +51,18 @@ function registerConnectionCommands(program, bmadFed) {
               type: 'list',
               name: 'type',
               message: 'Select database type:',
-              choices: ['mysql', 'postgresql', 'mongodb', 'oracle', 'sqlserver', 'sqlite'],
+              choices: ['supabase', 'postgresql', 'mysql', 'mongodb', 'oracle', 'sqlserver', 'sqlite'],
               default: options.type
             },
             {
               type: 'input',
               name: 'connectionString',
-              message: 'Enter connection string:',
+              message: (answers) => {
+                if (answers.type === 'supabase') {
+                  return 'Enter Supabase connection string (postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres):';
+                }
+                return 'Enter connection string:';
+              },
               validate: (input) => input.trim() !== '' || 'Connection string is required',
               default: options.connectionString
             },
@@ -91,10 +96,10 @@ function registerConnectionCommands(program, bmadFed) {
         }
         
         config.bmad_config.connections[name] = connectionConfig;
-        
+
         // Save the updated config
-        await configValidator.saveConfigFile(config, './bmad-fks-core/fks-core-config.yaml');
-        
+        await configValidator.saveConfigFile(config, './.bmad-fks-core/fks-core-config.yaml');
+
         spinner.succeed(chalk.green(`Connection "${name}" added successfully!`));
       } catch (error) {
         console.error(chalk.red(`Failed to add connection: ${error.message}`));
@@ -216,10 +221,10 @@ function registerConnectionCommands(program, bmadFed) {
         if (Object.keys(config.bmad_config.connections).length === 0) {
           delete config.bmad_config.connections;
         }
-        
+
         // Save the updated config
-        await configValidator.saveConfigFile(config, './bmad-fks-core/fks-core-config.yaml');
-        
+        await configValidator.saveConfigFile(config, './.bmad-fks-core/fks-core-config.yaml');
+
         spinner.succeed(chalk.green(`Connection "${name}" removed successfully!`));
         
         if (dependencies.length > 0) {

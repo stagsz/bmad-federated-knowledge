@@ -6,14 +6,34 @@ This document explains how to configure database connections and queries for the
 
 The system supports the following database types:
 
+- `supabase` - Supabase (PostgreSQL-based)
+- `postgresql` - PostgreSQL
 - `mongodb` - MongoDB
 - `mysql` - MySQL
-- `postgresql` - PostgreSQL
 - `oracle` - Oracle (coming soon)
 - `sqlserver` - SQL Server (coming soon)
 - `sqlite` - SQLite (coming soon)
 
 ## Connection String Formats
+
+### Supabase
+
+Supabase uses PostgreSQL under the hood. You can find your connection string in your Supabase project settings under "Database" > "Connection String" > "URI".
+
+Format:
+```
+postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+```
+
+Example:
+```
+postgresql://postgres:your-password@db.abcdefghijklmnop.supabase.co:5432/postgres
+```
+
+**Note:** Make sure to:
+1. Replace `[YOUR-PASSWORD]` with your actual database password
+2. Replace `[PROJECT-REF]` with your Supabase project reference ID
+3. Enable connection pooling if needed by using port 6543 instead of 5432
 
 ### MongoDB
 
@@ -74,6 +94,19 @@ MongoDB supports two query formats:
 
 ## Examples
 
+### Adding a Supabase Connection
+
+```bash
+bmad-fed connection-add supabase-prod -t supabase -s "postgresql://postgres:your-password@db.abcdefghijklmnop.supabase.co:5432/postgres"
+```
+
+Or using interactive mode:
+```bash
+bmad-fed connection-add supabase-prod -i
+# Then select 'supabase' from the database type options
+# And paste your Supabase connection string when prompted
+```
+
 ### Adding a MongoDB Connection
 
 ```bash
@@ -96,6 +129,23 @@ bmad-fed add-knowledge employee_data -t database --connection-ref mongo-dev --qu
 
 ```bash
 bmad-fed sync-db employee_data
+```
+
+### Complete Supabase Example
+
+Here's a complete example of setting up and syncing a Supabase knowledge source:
+
+```bash
+# 1. Add Supabase connection
+bmad-fed connection-add my-supabase -t supabase -s "postgresql://postgres:your-password@db.xyz.supabase.co:5432/postgres"
+
+# 2. Add a knowledge source that queries a Supabase table
+bmad-fed add-knowledge user_profiles -t database --connection-ref my-supabase --query "SELECT * FROM profiles WHERE active = true"
+
+# 3. Sync the knowledge source to PDF
+bmad-fed sync-db user_profiles
+
+# 4. The data is now cached at: .bmad-fks-cache/db-knowledge/user_profiles.pdf
 ```
 
 ## Troubleshooting

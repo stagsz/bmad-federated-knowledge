@@ -1,0 +1,76 @@
+# ==================================================
+# SUPABASE SETUP COMMANDS - Quick Reference
+# ==================================================
+# Copy and paste these commands in order
+
+# Step 1: SQL (Copy to Supabase SQL Editor)
+# --------------------------------------------------
+# Open: https://supabase.com/dashboard/project/jesjoxkhqnxjpeesxajv
+# Go to: SQL Editor → New Query
+# Then copy the contents of: supabase-setup.sql
+# Click: Run
+
+
+# Step 2: Add Knowledge Sources (Run in Terminal)
+# --------------------------------------------------
+
+# Add user profiles (active users only)
+npx bmad-fed add-knowledge user_profiles -t database --connection-ref my-supabase --query "SELECT * FROM profiles WHERE active = true"
+
+# Add knowledge base
+npx bmad-fed add-knowledge knowledge_base -t database --connection-ref my-supabase --query "SELECT * FROM knowledge_items"
+
+# Add all profiles
+npx bmad-fed add-knowledge all_profiles -t database --connection-ref my-supabase --query "SELECT * FROM profiles ORDER BY created_at DESC"
+
+
+# Step 3: Sync Knowledge (Run in Terminal)
+# --------------------------------------------------
+
+# Sync user profiles
+npx bmad-fed sync-db user_profiles
+
+# Sync knowledge base
+npx bmad-fed sync-db knowledge_base
+
+# Or sync all at once
+npx bmad-fed sync-db --all
+
+
+# Step 4: Build Complete Context (Run in Terminal)
+# --------------------------------------------------
+
+npx bmad-fed build-context
+
+
+# Verification Commands
+# --------------------------------------------------
+
+# List all connections
+npx bmad-fed connection-list
+
+# Check system status
+npx bmad-fed status
+
+# List all repositories
+npx bmad-fed list
+
+
+# Optional: JSON Format Instead of PDF
+# --------------------------------------------------
+
+npx bmad-fed sync-db user_profiles --json
+npx bmad-fed sync-db knowledge_base --json
+
+
+# Custom Query Examples
+# --------------------------------------------------
+
+# Only admin users
+npx bmad-fed add-knowledge admin_profiles -t database --connection-ref my-supabase --query "SELECT username, full_name, email, role FROM profiles WHERE active = true AND role = 'admin'"
+
+# Recent knowledge (last 30 days)
+npx bmad-fed add-knowledge recent_knowledge -t database --connection-ref my-supabase --query "SELECT * FROM knowledge_items WHERE created_at > NOW() - INTERVAL '30 days' ORDER BY created_at DESC"
+
+# Guides only
+npx bmad-fed add-knowledge guides -t database --connection-ref my-supabase --query "SELECT * FROM knowledge_items WHERE category = 'guides'"

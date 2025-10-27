@@ -206,6 +206,7 @@ async function executeQuery(connection, query, useMock = false) {
           throw new Error('MySQL driver not found. Install it with: npm install mysql2');
         }
         break;
+      case 'supabase':
       case 'postgresql':
         try {
           pgModule = require('pg');
@@ -234,6 +235,7 @@ async function executeQuery(connection, query, useMock = false) {
         return await queryMongodb(mongodbModule, connection.connection_string, query);
       case 'mysql':
         return await queryMysql(mysqlModule, connection.connection_string, query);
+      case 'supabase':
       case 'postgresql':
         return await queryPostgres(pgModule, connection.connection_string, query);
       default:
