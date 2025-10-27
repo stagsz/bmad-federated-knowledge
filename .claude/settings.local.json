@@ -3,7 +3,8 @@
     "allow": [
       "Bash(bmad-fed init:*)",
       "Bash(npx bmad-fed:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
