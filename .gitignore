@@ -89,6 +89,16 @@ bmad-cache/
 logs/
 *.log
 
+# BMAD-FKS configuration (contains sensitive data like database passwords)
+.bmad-fks-core/
+bmad-fks-core/
+
+# Claude Code configuration (user-specific)
+.claude/
+
+# Cache directories
+.bmad-fks-cache/
+
 # Test artifacts
 test-temp-*
 temp-*
